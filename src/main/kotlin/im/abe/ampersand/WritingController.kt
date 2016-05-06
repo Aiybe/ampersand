@@ -39,7 +39,7 @@ open class WritingController @Autowired constructor(val documents: DocumentRepos
 
     @RequestMapping("/a/{slug}", method = arrayOf(RequestMethod.POST))
     fun postAssignment(@PathVariable slug: String, response: NewResponse,
-                       session: HttpSession, model: Model): String {
+                       session: HttpSession): String {
         val assignment = assignments.findBySlug(slug)
         if (assignment != null) {
             documents.save(Document(response.name, response.url, response.id, Instant.now(), assignment))
@@ -53,7 +53,7 @@ open class WritingController @Autowired constructor(val documents: DocumentRepos
     @RequestMapping("/a/{slug}/verify", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun verify(@PathVariable slug: String, verification: Verification,
-               session: HttpSession, model: Model): Boolean {
+               session: HttpSession): Boolean {
         val assignment = assignments.findBySlug(slug)
         if (assignment != null && (assignment.accountID == verification.id ||
                 documents.findByAccountIDAndAssignment(verification.id, assignment) != null)) {
@@ -66,16 +66,17 @@ open class WritingController @Autowired constructor(val documents: DocumentRepos
 
     private tailrec fun createAssignment(name: String, description: String, accountID: String,
                                          length: Int = 1, random: Random = Random()): Assignment {
-        val slug = StringBuilder()
+        val slugBuilder = StringBuilder()
 
-        while (slug.length < length) {
-            slug.append(possibleCharacters[random.nextInt(possibleCharacters.size)])
+        while (slugBuilder.length < length) {
+            slugBuilder.append(possibleCharacters[random.nextInt(possibleCharacters.size)])
         }
 
-        if (assignments.findBySlug(slug.toString()) != null) {
+        val slug = slugBuilder.toString()
+        if (slug == "new" || assignments.findBySlug(slug) != null) {
             return createAssignment(name, description, accountID, length + 1)
         } else {
-            return assignments.save(Assignment(name, description, slug.toString(), accountID))
+            return assignments.save(Assignment(name, description, slug, accountID))
         }
     }
 
