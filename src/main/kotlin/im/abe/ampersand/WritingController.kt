@@ -19,9 +19,13 @@ open class WritingController @Autowired constructor(val documents: DocumentRepos
 
     @RequestMapping("/a/new", method = arrayOf(RequestMethod.POST))
     fun newAssignment(writing: NewWriting, session: HttpSession): String {
-        val assignment = createAssignment(writing.name, writing.description, writing.id)
-        session.setAttribute("canSeeResponses" + assignment.slug, true)
-        return "redirect:/a/" + assignment.slug
+        if (writing.name.isEmpty()) {
+            return "newAssignment"
+        } else {
+            val assignment = createAssignment(writing.name, writing.description, writing.id)
+            session.setAttribute("canSeeResponses" + assignment.slug, true)
+            return "redirect:/a/" + assignment.slug
+        }
     }
 
     @RequestMapping("/a/{slug}", method = arrayOf(RequestMethod.GET))
