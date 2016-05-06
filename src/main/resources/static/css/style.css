@@ -28,8 +28,8 @@
     color: #ffffff;
     background-color: #333333;
 
-    animation: blink 1s step-end 5s infinite;
-    -webkit-animation: blink 1s step-end 5s infinite;
+    animation: blink 0.8s step-end 5s infinite;
+    -webkit-animation: blink 0.8s step-end 5s infinite;
 }
 
 @keyframes blink {
