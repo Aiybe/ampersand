@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:with="template='writing'"
+      layout:decorator="base/base">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${assignment.name}"></title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<span layout:fragment="title" th:text="${assignment.name}"></span>
+
+<div layout:fragment="content">
+    <div class="jumbotron">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-9">
+                    <p th:utext="${assignment.description}"></p>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group input-group-sm">
+                        <input readonly type="text" class="form-control" title="URL" id="shareURL">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="copyShareURL">Copy</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row" th:switch="${canSeeResponses}">
+            <div th:case="true">
+                <div class="col-md-12" id="responses">
+                    <div class="list-group">
+                        <a th:each="doc : ${assignment.documents}" class="list-group-item"
+                           th:href="${doc.url}" target="_blank">
+                            <h4 class="list-group-item-heading" th:text="${doc.name}"></h4>
+                            <p class="list-group-item-text">Submitted <span th:text="${doc.humanTime()}"></span></p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div th:case="*">
+                <div class="col-md-12">
+                    <p class="lead"><b><a href="#" id="pickFile">Log in</a></b>
+                        with your Google account to upload and view responses.</p>
+                    <form method="post" id="urlForm">
+                        <input type="hidden" name="url" id="urlField">
+                        <input type="hidden" name="name" id="nameField">
+                        <input type="hidden" name="id" id="idField">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="script">
+    // The Browser API key obtained from the Google Developers Console.
+    var developerKey = 'AIzaSyBSp-QKPC84pWihr9KMAjZiet_ZS5ejNwQ';
+
+    // The Client ID obtained from the Google Developers Console. Replace with your own Client ID.
+    var clientId = "1035626008439-2chef66q7q04plsbj1lntohii08ahda9.apps.googleusercontent.com";
+
+    // Scope to use to access user's photos.
+    var scope = ['profile', 'https://www.googleapis.com/auth/drive'];
+
+    var oauthToken;
+
+    // Use the API Loader script to load google.picker and gapi.auth.
+    function loaded() {
+        if ($('#responses').length)
+            return;
+
+        console.log('loaded');
+
+        gapi.load('auth', function () {
+            window.gapi.auth.authorize({
+                'client_id': clientId,
+                'scope': scope,
+                'immediate': true
+            }, handleEarlyAuthResult);
+        });
+        gapi.load('picker');
+        gapi.client.load('plus');
+        gapi.client.load('drive', 'v3');
+    }
+
+    function handleEarlyAuthResult(authResult) {
+        if (authResult && !authResult.error) {
+            gapi.client.plus.people.get({
+                'userId': 'me'
+            }).execute(function (res) {
+                $.post(location.pathname + '/verify', {id: res.id}, function (res) {
+                    if (res) {
+                        location.reload();
+                    } else {
+                        oauthToken = authResult.access_token;
+                    }
+                });
+            });
+        }
+    }
+
+    function handleAuthResult(authResult) {
+        if (authResult && !authResult.error) {
+            gapi.client.plus.people.get({
+                'userId': 'me'
+            }).execute(function (res) {
+                $.post(location.pathname + '/verify', {id: res.id}, function (res) {
+                    if (res) {
+                        location.reload();
+                    } else {
+                        oauthToken = authResult.access_token;
+                    }
+                });
+            });
+        }
+    }
+
+    // Create and render a Picker object for picking user Photos.
+    function createPicker() {
+        if (oauthToken) {
+            var picker = new google.picker.PickerBuilder()
+                    .addView(google.picker.ViewId.DOCS)
+                    .setOAuthToken(oauthToken)
+                    .setDeveloperKey(developerKey)
+                    .setCallback(pickerCallback).build();
+            picker.setVisible(true);
+        }
+    }
+
+    // A simple callback implementation.
+    function pickerCallback(data) {
+        if (data.action == google.picker.Action.PICKED) {
+            console.log('picked');
+            var fileId = data.docs[0].id;
+            console.log(fileId);
+            gapi.client.drive.permissions.create({
+                resource: {
+                    'type': 'anyone',
+                    'role': 'commenter'
+                },
+                fileId: fileId
+            }).execute(function (res) {
+                console.log('success!');
+                console.log(res);
+
+                gapi.client.plus.people.get({
+                    'userId': 'me'
+                }).execute(function (res) {
+                    $('#nameField').val(res.displayName);
+                    $('#idField').val(res.id);
+                    $('#urlField').val(data.docs[0][google.picker.Document.URL]);
+                    $('#urlForm').submit();
+                });
+            });
+        }
+    }
+
+    $('#pickFile').click(function () {
+        if (oauthToken) {
+            createPicker();
+        } else {
+            window.gapi.auth.authorize({
+                'client_id': clientId,
+                'scope': scope,
+                'immediate': false
+            }, handleAuthResult);
+        }
+        return false;
+    });
+
+    var $shareURL = $('#shareURL');
+    var $copyShareURL = $('#copyShareURL');
+    $shareURL.val(location.href);
+    $copyShareURL.click(function () {
+        $shareURL.select();
+        document.execCommand('copy');
+    })
+</script>
+<script src="https://apis.google.com/js/client.js?onload=loaded" layout:fragment="script2"></script>
+
+</body>
+</html>

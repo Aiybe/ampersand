@@ -1,0 +1,81 @@
+.top-header {
+    background-color: #f8f8f8;
+    padding: 10px 0 10px 0;
+    border: 0 solid #e7e7e7;
+    border-bottom-width: 4px;
+    margin-bottom: 10px;
+}
+
+.top-header + div > .jumbotron {
+    margin-top: -10px;
+}
+
+.top-header > .container > * {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.top-header .home {
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #333333;
+}
+
+.top-header .home:hover {
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #333333;
+
+    animation: blink 1s step-end 5s infinite;
+    -webkit-animation: blink 1s step-end 5s infinite;
+}
+
+@keyframes blink {
+    50% {
+        color: #333333;
+        background-color: transparent;
+    }
+}
+
+@-webkit-keyframes blink {
+    50% {
+        color: #333333;
+        background-color: transparent;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 50px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 40px;
+    background-color: #f5f5f5;
+    padding-top: 10px;
+}
+
+.jumbotron {
+    border-top-width: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.editable {
+    outline: none;
+    margin: 0 0 20px 0;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid #dbdbdb;
+}

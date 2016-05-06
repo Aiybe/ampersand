@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title layout:title-pattern="$DECORATOR_TITLE $CONTENT_TITLE">&</title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="top-header">
+    <div class="container">
+        <h1>
+            <a class="home" href="/"><b>&</b></a>
+            <span layout:fragment="title"></span>
+        </h1>
+    </div>
+</div>
+
+<div layout:fragment="content">
+</div>
+
+<footer>
+    <div class="container">
+        <p class="text-muted">ampersand &copy; 2016 abe jellinek. want to <a href="mailto:im@abe.im">contact me?</a></p>
+    </div>
+</footer>
+
+<script type="text/javascript" src="/js/jquery-2.2.3.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script layout:fragment="script"></script>
+<script layout:fragment="script2"></script>
+
+</body>
+</html>
